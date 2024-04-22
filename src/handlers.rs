@@ -5,6 +5,10 @@ pub async fn greet(request: HttpRequest) -> impl Responder {
     return format!("Hello {}", sentence_case(name));
 }
 
+pub async fn health_check(request: HttpRequest) -> impl Responder {
+    return HttpResponse::Ok();
+}
+
 fn sentence_case(input: &str) -> String {
     let output = input
         .chars()
