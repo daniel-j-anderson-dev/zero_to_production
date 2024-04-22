@@ -1,14 +1,15 @@
 pub mod handlers;
 
-use actix_web::{web::get, App, HttpServer};
+use crate::handlers::greet;
 
-use handlers::root;
+use actix_web::{web::get, App, HttpServer};
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     HttpServer::new(|| {
         App::new()
-            .route("/", get().to(root))
+            .route("/", get().to(greet))
+            .route("/{name}", get().to(greet))
     })
     .bind("localhost:8000")?
     .run()
