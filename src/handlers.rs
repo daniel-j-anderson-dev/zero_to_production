@@ -1,25 +1,27 @@
-use actix_web::{HttpRequest, HttpResponse, Responder};
+use axum::{debug_handler, extract::Path, http::StatusCode };
 
-pub async fn greet(request: HttpRequest) -> impl Responder {
-    let name = request.match_info().get("name").unwrap_or("World");
-    return format!("Hello {}", sentence_case(name));
+#[debug_handler]
+pub async fn greet(Path(name): Path<String>) -> String {
+    format!("Hello {}", sentence_case(&name))
 }
 
-pub async fn health_check(request: HttpRequest) -> impl Responder {
-    return HttpResponse::Ok();
+#[debug_handler]
+pub async fn health_check() -> StatusCode {
+    StatusCode::OK
 }
 
 fn sentence_case(input: &str) -> String {
-    let output = input
-        .chars()
-        .enumerate()
-        .map(|(i, c)| {
-            if i == 0 {
-                c.to_uppercase()
-            } else {
-                c.to_lowercase()
-            }
+    let mut characters = input.chars();
+
+    let output = characters
+        .next()
+        .map(|first_character| {
+            first_character
+                .to_uppercase()
+                .chain(characters.flat_map(|character| character.to_lowercase()))
+                .collect()
         })
-        .collect();
-    return output;
+        .unwrap_or_default();
+
+    output
 }

@@ -1,19 +1,22 @@
 pub mod handlers;
 
-use crate::handlers::{greet, health_check};
+use tokio::net::TcpListener;
 
-use actix_web::{web::get, App, HttpServer};
+use axum::{routing::get, Router};
+
+use crate::handlers::{greet, health_check};
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
-    HttpServer::new(|| {
-        App::new()
-            .route("/", get().to(health_check))
-            .route("/{name}", get().to(greet))
-    })
-    .bind("localhost:8000")?
-    .run()
-    .await?;
+    let server_address = std::env::args().nth(1).unwrap_or_else(|| String::from("localhost:8000"));
 
-    return Ok(());
+    let listener = TcpListener::bind(server_address).await?;
+
+    let router = Router::new()
+        .route("/", get(health_check))
+        .route("/:name", get(greet));
+
+    axum::serve(listener, router).await?;
+
+    Ok(())
 }
